@@ -30,7 +30,7 @@ inputs:
 outputs:
   changes:
     description: Number of changed files.
-    value: ${{  }}
+    value: ${{ steps.replace.outputs.changes }}
 
 runs:
   using: 'composite'
