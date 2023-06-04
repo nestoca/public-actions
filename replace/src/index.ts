@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { findRepl } from 'find-repl';
+import { findRepl } from './replace';
 
 async function run(): Promise<void> {
   try {
@@ -17,7 +17,10 @@ async function run(): Promise<void> {
 
     // Perform search & replace
     const searchExp = regex == 'true' ? new RegExp(search, '') : search;
-    await findRepl(searchExp, replace, glob);
+    const changes = await findRepl(searchExp, replace, glob);
+
+    // Set outputs
+    core.setOutput('changes', changes);
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }

@@ -1,7 +1,9 @@
 name: replace
 description: |-
-  Performs a search and replace operation using regex expressions (or plain text)
+  Performs a search and replace operation using JS regex expressions (or plain text)
   within files matching a certain glob pattern and returns whether any changes were made.
+  Use https://regex101.com/ to test your regex expressions.
+  Use https://globster.xyz/ to test your glob patterns.
 
 inputs:
   glob:
@@ -11,7 +13,8 @@ inputs:
     required: false
     default: "**/*"
   search:
-    description: Text to search for.
+    description: |-
+      Regex expression to search for (or set `regex` to "false" to search for plain text instead).
     required: true
   replace:
     description: Text to replace with.
@@ -20,6 +23,10 @@ inputs:
     description: Whether to enable regex ("true") or not ("false"). Defaults to "true".
     required: false
     default: "true"
+
+outputs:
+  changes:
+    description: Number of changed files.
 
 runs:
   using: 'node16'

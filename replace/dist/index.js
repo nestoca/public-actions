@@ -2703,6 +2703,105 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ 783:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ensureEndsWithSlash = exports.escapeStringForRegex = exports.globToRegex = void 0;
+//
+// Adapted from https://github.com/tbjgolden/find-repl
+// Copyright © Tom Golden
+//
+const posix_1 = __nccwpck_require__(410);
+const GLOBSTAR_REGEX = /(^|\/)\\\*\\\*(?:\/|$)/;
+const WILDCARD_REGEX = /\\\*/;
+const SET_REGEX = /\\{(.*)?(\\})/;
+const COMMA_REGEX = /,/g;
+const globToRegex = (glob, basePath = process.cwd()) => {
+    // features:
+    // relative / absolute based on start of glob
+    const isAbsolute = glob.startsWith('/');
+    let regexSource = (0, exports.escapeStringForRegex)((0, posix_1.normalize)(glob));
+    // ** = globstar (must not have adjacent char besides a /)
+    let globstarMatch = regexSource.match(GLOBSTAR_REGEX);
+    while (globstarMatch !== null) {
+        const index = globstarMatch.index;
+        if (index === undefined) {
+            break;
+        }
+        else {
+            regexSource =
+                regexSource.slice(0, index) +
+                    globstarMatch[1] +
+                    '.*' +
+                    regexSource.slice(index + globstarMatch[0].length);
+            globstarMatch = regexSource.match(GLOBSTAR_REGEX);
+        }
+    }
+    // * = wildcard
+    let wildcardMatch = regexSource.match(WILDCARD_REGEX);
+    while (wildcardMatch !== null) {
+        const index = wildcardMatch.index;
+        if (index === undefined) {
+            break;
+        }
+        else {
+            regexSource =
+                regexSource.slice(0, index) +
+                    '[^/]*' +
+                    regexSource.slice(index + wildcardMatch[0].length);
+            wildcardMatch = regexSource.match(WILDCARD_REGEX);
+        }
+    }
+    // {,} = set
+    let setMatch = regexSource.match(SET_REGEX);
+    while (setMatch !== null) {
+        const index = setMatch.index;
+        if (index === undefined) {
+            break;
+        }
+        else {
+            regexSource =
+                regexSource.slice(0, index) +
+                    '(?:' +
+                    setMatch[1].replace(COMMA_REGEX, '|') +
+                    ')' +
+                    regexSource.slice(index + setMatch[0].length);
+            setMatch = regexSource.match(SET_REGEX);
+        }
+    }
+    return new RegExp('^' +
+        (isAbsolute
+            ? ''
+            : (0, exports.escapeStringForRegex)((0, exports.ensureEndsWithSlash)((0, posix_1.normalize)(basePath)))) +
+        regexSource +
+        '$');
+};
+exports.globToRegex = globToRegex;
+const ESCAPE_REGEX = /[\t\n$()*+.?[\\\]^{|}]/g;
+const replacer = (value) => {
+    if (value === '\n') {
+        return '\\n';
+    }
+    if (value === '\t') {
+        return '\\t';
+    }
+    return '\\' + value;
+};
+const escapeStringForRegex = (string) => {
+    return string.replace(ESCAPE_REGEX, replacer);
+};
+exports.escapeStringForRegex = escapeStringForRegex;
+const ensureEndsWithSlash = (path) => {
+    return path.endsWith('/') ? path : path + '/';
+};
+exports.ensureEndsWithSlash = ensureEndsWithSlash;
+
+
+/***/ }),
+
 /***/ 144:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -2742,6 +2841,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
+const replace_1 = __nccwpck_require__(287);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -2749,12 +2849,17 @@ function run() {
             const glob = core.getInput('glob');
             const search = core.getInput('search');
             const replace = core.getInput('replace');
-            // TODO
-            console.log('glob: ' + glob);
-            console.log('search: ' + search);
-            console.log('replace: ' + replace);
+            const regex = core.getInput('regex');
+            // Validate inputs
+            if (regex != 'true' && regex != 'false') {
+                core.setFailed('`regex` input must be either "true" or "false"');
+                return;
+            }
+            // Perform search & replace
+            const searchExp = regex == 'true' ? new RegExp(search, '') : search;
+            const changes = yield (0, replace_1.findRepl)(searchExp, replace, glob);
             // Set outputs
-            core.setOutput('changed', 'false');
+            core.setOutput('changes', changes);
         }
         catch (error) {
             if (error instanceof Error)
@@ -2763,6 +2868,74 @@ function run() {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 287:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findRepl = void 0;
+//
+// Adapted from https://github.com/tbjgolden/find-repl
+// Copyright © Tom Golden
+//
+const promises_1 = __nccwpck_require__(977);
+const node_child_process_1 = __nccwpck_require__(718);
+const glob_1 = __nccwpck_require__(783);
+const escapeStringForRegex = (str) => {
+    return str.replace(/[$()*+.?[\\\]^{|}]/g, '\\$&');
+};
+const replaceAll = (str, from, to) => {
+    return from instanceof RegExp
+        ? str.replace(from.global ? from : new RegExp(from.source, from.flags + 'g'), to)
+        : str.replace(new RegExp(escapeStringForRegex(from), 'g'), to);
+};
+const findRepl = (find, replace, inFilesMatching = '**/*') => __awaiter(void 0, void 0, void 0, function* () {
+    const fileMatcherRegex = (0, glob_1.globToRegex)(inFilesMatching, '');
+    let changes = 0;
+    for (const file of (0, node_child_process_1.execSync)('git ls-files --cached --others --exclude-standard')
+        .toString()
+        .split('\n')
+        .filter(Boolean)) {
+        try {
+            if (fileMatcherRegex.test('./' + file)) {
+                const input = yield (0, promises_1.readFile)(file, 'utf8');
+                const output = replaceAll(input, find, replace);
+                if (output != input) {
+                    console.log('Changed: ' + file);
+                    changes++;
+                }
+                yield (0, promises_1.writeFile)(file, output);
+            }
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                if ('code' in error && error.code === 'ENOENT') {
+                    continue;
+                }
+                throw error;
+            }
+        }
+    }
+    if (changes == 0) {
+        console.log('No file changed.');
+    }
+    return changes;
+});
+exports.findRepl = findRepl;
 
 
 /***/ }),
@@ -2820,6 +2993,30 @@ module.exports = require("https");
 
 "use strict";
 module.exports = require("net");
+
+/***/ }),
+
+/***/ 718:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:child_process");
+
+/***/ }),
+
+/***/ 977:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs/promises");
+
+/***/ }),
+
+/***/ 410:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path/posix");
 
 /***/ }),
 
