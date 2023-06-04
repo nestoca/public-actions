@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { findRepl } from 'find-repl';
 
 async function run(): Promise<void> {
   try {
@@ -6,14 +7,17 @@ async function run(): Promise<void> {
     const glob = core.getInput('glob');
     const search = core.getInput('search');
     const replace = core.getInput('replace');
+    const regex = core.getInput('regex');
 
-    // TODO
-    console.log('glob: ' + glob);
-    console.log('search: ' + search);
-    console.log('replace: ' + replace);
+    // Validate inputs
+    if (regex != 'true' && regex != 'false') {
+      core.setFailed('`regex` input must be either "true" or "false"');
+      return;
+    }
 
-    // Set outputs
-    core.setOutput('changed', 'false');
+    // Perform search & replace
+    const searchExp = regex == 'true' ? new RegExp(search, '') : search;
+    await findRepl(searchExp, replace, glob);
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }
