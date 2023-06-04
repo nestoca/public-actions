@@ -1,0 +1,53 @@
+name: replace
+description: |-
+  Performs a search and replace operation in current git repo using JS regex expressions (or plain text)
+  within files matching a certain glob pattern and commits and pushes changes, if any.
+  Use https://regex101.com/ to test your regex expressions.
+  Use https://globster.xyz/ to test your glob patterns.
+
+inputs:
+  message:
+    description: Commit message.
+    required: true
+  glob:
+    description: |-
+      Optional glob pattern to determine which files to perform the search and replace against.
+      Defaults to "**/*".
+    required: false
+    default: "**/*"
+  search:
+    description: |-
+      Regex expression to search for (or set `regex` to "false" to search for plain text instead).
+    required: true
+  replace:
+    description: Text to replace with.
+    required: true
+  regex:
+    description: Whether to enable regex ("true") or not ("false"). Defaults to "true".
+    required: false
+    default: "true"
+
+outputs:
+  changes:
+    description: Number of changed files.
+    value: ${{  }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Replace in repo
+      id: replace
+      uses: ../replace
+      with:
+        glob: ${{ inputs.glob }}
+        search: ${{ inputs.search }}
+        replace: ${{ inputs.replace }}
+        regex: ${{ inputs.regex }}
+    - name: Commit and push changes
+      shell: bash
+      if: ${{ steps.replace.outputs.changes != '0' }}
+      run: |
+        git pull
+        git add .
+        git commit -m 'Promote image in get-build-info action.yaml to: ${{ steps.info.output.docker-tag }}'
+        git push
