@@ -1,0 +1,26 @@
+name: replace
+description: |-
+  Performs a search and replace operation using regex expressions within files matching
+  a certain glob pattern and returns whether any changes were made.
+
+inputs:
+  glob:
+    description: |-
+      Optional glob pattern to determine which files to perform the search and replace against.
+      Defaults to "**/*".
+    required: false
+    default: "**/*"
+  search:
+    description: Regex search expression.
+    required: true
+  replace:
+    description: Regex replace expression.
+    required: true
+
+outputs:
+  changed:
+    description: Whether any change was made ("true") or not ("false").
+      
+runs:
+  using: 'node16'
+  main: 'index.js'
