@@ -22,6 +22,6 @@ runs:
   steps:
     - name: Add and push commit tag
       shell: bash
-      run: |
+      run: |-
         git tag ${{ inputs.tag }} ${{ inputs.commit }}
         git push origin ${{ inputs.tag }}
