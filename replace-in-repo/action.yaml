@@ -1,5 +1,5 @@
 name: replace
-description: |-
+description: >-
   Performs a search and replace operation in current git repo using JS regex expressions (or plain text)
   within files matching a certain glob pattern and commits and pushes changes, if any.
   Use https://regex101.com/ to test your regex expressions.
@@ -10,13 +10,13 @@ inputs:
     description: Commit message.
     required: true
   glob:
-    description: |-
+    description: >-
       Optional glob pattern to determine which files to perform the search and replace against.
       Defaults to "**/*".
     required: false
     default: "**/*"
   search:
-    description: |-
+    description: >-
       Regex expression to search for (or set `regex` to "false" to search for plain text instead).
     required: true
   replace:
@@ -46,7 +46,7 @@ runs:
     - name: Commit and push changes
       shell: bash
       if: ${{ steps.replace.outputs.changes != '0' }}
-      run: |
+      run: |-
         git pull
         git add .
         git commit -m 'Promote image in get-build-info action.yaml to: ${{ steps.info.output.docker-tag }}'
