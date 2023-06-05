@@ -2856,7 +2856,7 @@ function run() {
                 return;
             }
             // Perform search & replace
-            const searchExp = regex == 'true' ? new RegExp(search, '') : search;
+            const searchExp = regex == 'true' ? new RegExp(search, 'gm') : search;
             const changes = yield (0, replace_1.findRepl)(searchExp, replace, glob);
             // Set outputs
             core.setOutput('changes', changes);

@@ -16,7 +16,7 @@ async function run(): Promise<void> {
     }
 
     // Perform search & replace
-    const searchExp = regex == 'true' ? new RegExp(search, '') : search;
+    const searchExp = regex == 'true' ? new RegExp(search, 'gm') : search;
     const changes = await findRepl(searchExp, replace, glob);
 
     // Set outputs
