@@ -37,7 +37,7 @@ runs:
   steps:
     - name: Replace in repo
       id: replace
-      uses: silphid/actions/replace@master
+      uses: silphid/actions/replace@v1
       with:
         glob: ${{ inputs.glob }}
         search: ${{ inputs.search }}
