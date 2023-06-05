@@ -49,5 +49,5 @@ runs:
       run: |-
         git pull
         git add .
-        git commit -m 'Promote image in get-build-info action.yaml to: ${{ steps.info.output.docker-tag }}'
+        git commit -m '${{ inputs.message }}'
         git push
