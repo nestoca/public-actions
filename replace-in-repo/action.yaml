@@ -35,6 +35,13 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Ensure clean working copy
+      shell: bash
+      run: |-
+        if [[ -n $(git status --porcelain) ]]; then
+          echo "Error: Uncommited changes detected. Aborting to prevent committing and pushing those changes." >&2
+          exit 1
+        fi
     - name: Replace in repo
       id: replace
       uses: silphid/actions/replace@v1
