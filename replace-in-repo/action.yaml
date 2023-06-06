@@ -59,7 +59,7 @@ runs:
             echo "Resetting uncommitted changes."
             git reset --hard
           else
-            echo "Error: Aborting to prevent committing and pushing those changes. Turn on `reset` option to discard changes." >&2
+            echo "Error: Aborting to prevent committing and pushing those changes. Turn on reset option to discard changes." >&2
             exit 1
           fi
         fi
