@@ -2,6 +2,7 @@ name: tag-commit
 description: Adds given tag to git commit and pushes tag to remote
 
 inputs:
+
   commit:
     description: |-
       Commit to be tagged, defaulting to value of `GITHUB_SHA`. Can be specified
@@ -13,6 +14,7 @@ inputs:
         - etc.
     required: false
     default: ${{ github.sha }}
+
   tag:
     description: Value of tag to add to given commit.
     required: true
@@ -20,6 +22,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
+
     - name: Add and push commit tag
       shell: bash
       run: |-

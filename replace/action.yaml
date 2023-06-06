@@ -1,32 +1,36 @@
 name: replace
-description: |-
+description: >-
   Performs a search and replace operation using JS regex expressions (or plain text)
-  within files matching a certain glob pattern and returns whether any changes were made.
-  Use https://regex101.com/ to test your regex expressions.
+  in files matching a certain glob pattern within current git working copy and returns
+  number of changed files.
+  Use https://regex101.com/ to test your regex expressions (ensure to select JS mode).
   Use https://globster.xyz/ to test your glob patterns.
 
 inputs:
+
   glob:
-    description: |-
-      Optional glob pattern to determine which files to perform the search and replace against.
-      Defaults to "**/*".
+    description: >-
+      Optional glob pattern to determine which files to perform the search and replace against (defaults to "**/*").
     required: false
     default: "**/*"
+
   search:
-    description: |-
-      Regex expression to search for (or set `regex` to "false" to search for plain text instead).
+    description: Regex expression to search for (or set `regex` to "false" to search for plain text instead).
     required: true
+
   replace:
-    description: Text to replace with.
+    description: Text to replace with. Use `$1` and so on to reintroduce capture groups.
     required: true
+
   regex:
-    description: Whether to enable regex ("true") or not ("false"). Defaults to "true".
+    description: Whether to enable regex ("true", the default) or not ("false").
     required: false
     default: "true"
 
 outputs:
+
   changes:
-    description: Number of changed files.
+    description: Number of changed files (as opposed to number of actual string replacements).
 
 runs:
   using: 'node16'

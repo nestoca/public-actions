@@ -1,33 +1,46 @@
 name: replace
 description: >-
-  Performs a search and replace operation in current git repo using JS regex expressions (or plain text)
-  within files matching a certain glob pattern and commits and pushes changes, if any.
-  Use https://regex101.com/ to test your regex expressions.
+  Performs a search and replace operation using JS regex expressions (or plain text)
+  in files matching a certain glob pattern within current git working copy and commits
+  and pushes changes, if any.
+  Use https://regex101.com/ to test your regex expressions (ensure to select JS mode).
   Use https://globster.xyz/ to test your glob patterns.
 
 inputs:
-  message:
-    description: Commit message.
-    required: true
+
   glob:
     description: >-
-      Optional glob pattern to determine which files to perform the search and replace against.
-      Defaults to "**/*".
+      Optional glob pattern to determine which files to perform the search and replace against (defaults to all files).
     required: false
     default: "**/*"
+
   search:
     description: >-
       Regex expression to search for (or set `regex` to "false" to search for plain text instead).
     required: true
+
   replace:
     description: Text to replace with.
     required: true
+ 
   regex:
     description: Whether to enable regex ("true") or not ("false"). Defaults to "true".
     required: false
     default: "true"
 
+  reset:
+    description: >-
+      Whether to reset all uncommitted local changes before replacement ('true')
+      or not ('false', the default).
+    required: false
+    default: 'false'
+
+  message:
+    description: Commit message.
+    required: true
+
 outputs:
+
   changes:
     description: Number of changed files.
     value: ${{ steps.replace.outputs.changes }}
@@ -35,14 +48,24 @@ outputs:
 runs:
   using: 'composite'
   steps:
+
     - name: Ensure clean working copy
       shell: bash
       run: |-
         if [[ -n $(git status --porcelain) ]]; then
-          echo "Error: Uncommited changes detected. Aborting to prevent committing and pushing those changes." >&2
-          exit 1
+          echo "Uncommited changes detected:"
+          git diff
+          echo
+          if [[ ${{ inputs.reset }} == 'true' ]]; then
+            echo "Resetting uncommitted changes."
+            git --reset hard
+          else
+            echo "Error: Aborting to prevent committing and pushing those changes. Turn on `reset` option to discard changes." >&2
+            exit 1
+          fi
         fi
-    - name: Replace in repo
+
+    - name: Replace within working copy
       id: replace
       uses: silphid/actions/replace@v1
       with:
@@ -50,6 +73,7 @@ runs:
         search: ${{ inputs.search }}
         replace: ${{ inputs.replace }}
         regex: ${{ inputs.regex }}
+ 
     - name: Commit and push changes
       shell: bash
       if: ${{ steps.replace.outputs.changes != '0' }}
