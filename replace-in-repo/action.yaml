@@ -1,5 +1,5 @@
 name: replace
-description: >-
+description: >
   Performs a search and replace operation using JS regex expressions (or plain text)
   in files matching a certain glob pattern within current git working copy and commits
   and pushes changes, if any.
@@ -9,13 +9,13 @@ description: >-
 inputs:
 
   glob:
-    description: >-
+    description: >
       Optional glob pattern to determine which files to perform the search and replace against (defaults to all files).
     required: false
     default: "**/*"
 
   search:
-    description: >-
+    description: >
       Regex expression to search for (or set `regex` to "false" to search for plain text instead).
     required: true
 
@@ -29,7 +29,7 @@ inputs:
     default: "true"
 
   reset:
-    description: >-
+    description: >
       Whether to reset all uncommitted local changes before replacement ('true')
       or not ('false', the default).
     required: false
