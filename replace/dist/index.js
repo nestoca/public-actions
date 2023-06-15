@@ -2846,10 +2846,13 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Get inputs
+            const workDir = core.getInput('work-dir');
             const glob = core.getInput('glob');
             const search = core.getInput('search');
             const replace = core.getInput('replace');
             const regex = core.getInput('regex');
+            // Set working directory
+            process.chdir(workDir);
             // Validate inputs
             if (regex != 'true' && regex != 'false') {
                 core.setFailed('`regex` input must be either "true" or "false"');
@@ -2859,7 +2862,7 @@ function run() {
             const searchExp = regex == 'true' ? new RegExp(search, 'gm') : search;
             const changes = yield (0, replace_1.findRepl)(searchExp, replace, glob);
             // Set outputs
-            core.setOutput('changes', changes);
+            core.setOutput('changes', changes.map(x => `"${x}"`).join(" "));
         }
         catch (error) {
             if (error instanceof Error)
@@ -2905,7 +2908,7 @@ const replaceAll = (str, from, to) => {
 };
 const findRepl = (find, replace, inFilesMatching = '**/*') => __awaiter(void 0, void 0, void 0, function* () {
     const fileMatcherRegex = (0, glob_1.globToRegex)(inFilesMatching, '');
-    let changes = 0;
+    let changes = [];
     for (const file of (0, node_child_process_1.execSync)('git ls-files --cached --others --exclude-standard')
         .toString()
         .split('\n')
@@ -2916,7 +2919,7 @@ const findRepl = (find, replace, inFilesMatching = '**/*') => __awaiter(void 0, 
                 const output = replaceAll(input, find, replace);
                 if (output != input) {
                     console.log('Changed: ' + file);
-                    changes++;
+                    changes.push(file);
                 }
                 yield (0, promises_1.writeFile)(file, output);
             }
@@ -2930,7 +2933,7 @@ const findRepl = (find, replace, inFilesMatching = '**/*') => __awaiter(void 0, 
             }
         }
     }
-    if (changes == 0) {
+    if (changes.length == 0) {
         console.log('No file changed.');
     }
     return changes;

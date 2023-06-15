@@ -8,6 +8,11 @@ description: >
 
 inputs:
 
+  work-dir:
+    description: Location where to perform operation. Defaults to workspace.
+    required: false
+    default: "."
+
   glob:
     description: >
       Optional glob pattern to determine which files to perform the search and replace against (defaults to "**/*").

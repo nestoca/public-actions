@@ -4,10 +4,14 @@ import { findRepl } from './replace';
 async function run(): Promise<void> {
   try {
     // Get inputs
+    const workDir = core.getInput('work-dir');
     const glob = core.getInput('glob');
     const search = core.getInput('search');
     const replace = core.getInput('replace');
     const regex = core.getInput('regex');
+
+    // Set working directory
+    process.chdir(workDir);
 
     // Validate inputs
     if (regex != 'true' && regex != 'false') {

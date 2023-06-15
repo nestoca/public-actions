@@ -8,11 +8,11 @@ in files matching a certain glob pattern within current git working copy and com
 
 # Inputs
 
+- `work-dir`: Optional location where to perform operation (and potentially where to check out repo, if it was specified). Defaults to workspace.
 - `glob`: Optional glob pattern to determine which files to perform the search and replace against (defaults to all files).
 - `search`: Regex expression to search for (or set `regex` to "false" to search for plain text instead).
 - `replace`: Text to replace with. Use `$1` and so on to reintroduce capture groups.
 - `regex`: Whether to enable regex ("true", the default) or not ("false").
-- `reset`: Whether to reset all uncommitted local changes before replacement ('true') or not ('false', the default).
 - `message`: Commit message.
 
 # Outputs
@@ -31,7 +31,7 @@ jobs:
       - name: Check out
         uses: actions/checkout@v3
 
-      - name: Translate greeting
+      - name: Translate greetings
         uses: silphid/actions/replace-in-repo@v1
         with:
           glob: "**/*.yaml"

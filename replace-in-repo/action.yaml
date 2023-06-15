@@ -8,6 +8,13 @@ description: >
 
 inputs:
 
+  work-dir:
+    description: >
+      Location where to perform operation (and potentially where to check out repo, if it was specified).
+      Defaults to workspace.
+    required: false
+    default: "."
+
   glob:
     description: >
       Optional glob pattern to determine which files to perform the search and replace against (defaults to all files).
@@ -28,13 +35,6 @@ inputs:
     required: false
     default: "true"
 
-  reset:
-    description: >
-      Whether to reset all uncommitted local changes before replacement ('true')
-      or not ('false', the default).
-    required: false
-    default: 'false'
-
   message:
     description: Commit message.
     required: true
@@ -49,25 +49,11 @@ runs:
   using: 'composite'
   steps:
 
-    - name: Ensure clean working copy
-      shell: bash
-      run: |-
-        if [[ -n $(git status --porcelain) ]]; then
-          echo "Uncommited changes detected:"
-          git status --porcelain
-          if [[ ${{ inputs.reset }} == 'true' ]]; then
-            echo "Resetting uncommitted changes."
-            git reset --hard
-          else
-            echo "Error: Aborting to prevent committing and pushing those changes. Turn on reset option to discard changes." >&2
-            exit 1
-          fi
-        fi
-
     - name: Replace within working copy
       id: replace
       uses: silphid/actions/replace@master
       with:
+        work-dir: ${{ inputs.work-dir }}
         glob: ${{ inputs.glob }}
         search: ${{ inputs.search }}
         replace: ${{ inputs.replace }}
@@ -77,6 +63,7 @@ runs:
       shell: bash
       if: ${{ steps.replace.outputs.changes != '' }}
       run: |-
+        cd ${{ inputs.work-dir }}
         git pull
         git add ${{ steps.replace.outputs.changes }}
         git commit -m '${{ inputs.message }}'

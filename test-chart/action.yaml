@@ -1,0 +1,25 @@
+name: test-chart
+description: Performs chart tests using https://github.com/silphid/testchart, if any present in `tests` sub-dir of chart.
+
+inputs:
+  work-dir:
+    description: >
+      Location where to perform operation. Defaults to workspace.
+    required: false
+    default: "."
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Perform chart tests
+      shell: bash
+      run: |
+        cd ${{ inputs.work-dir }}
+        if [ -d "tests" ]; then
+          curl -L -o $HOME/bin/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.9/testchart_0.0.9_linux_amd64.tar.gz
+          tar xvzf $HOME/bin/testchart.tar.gz -C $HOME/bin/
+          testchart run
+        else
+          echo "No tests sub-directory found in chart"
+        fi
