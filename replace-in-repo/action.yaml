@@ -51,7 +51,7 @@ runs:
 
     - name: Replace within working copy
       id: replace
-      uses: silphid/actions/replace@master
+      uses: silphid/actions/replace@v1
       with:
         work-dir: ${{ inputs.work-dir }}
         glob: ${{ inputs.glob }}

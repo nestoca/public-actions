@@ -43,21 +43,26 @@ runs:
       run: |
         cd ${{ inputs.work-dir }}
         if [ -d "${{ inputs.path }}" ]; then
+
+          # Install testchart
           curl -L -o $HOME/bin/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.19/testchart_0.0.19_linux_amd64.tar.gz
           tar xvzf $HOME/bin/testchart.tar.gz -C $HOME/bin/
 
+          # Build testchart command
           command="testchart run \
             --namespace ${{ inputs.namespace }} \
             --release ${{ inputs.release }} \
             --path ${{ inputs.path }} \
             --show-values ${{ inputs.show-values }}"
 
-          # Add all ignore patterns passed as a multi-line string, if any
+          # Add ignore patterns passed as a multi-line string, if any
           while IFS= read -r line; do
             command+=" --ignore '$line'"
           done <<< "${{ inputs.ignore }}}"
 
+          # Run testchart
           eval "$command"
+
         else
           echo "No ${{ inputs.path }} sub-directory found in chart"
         fi
