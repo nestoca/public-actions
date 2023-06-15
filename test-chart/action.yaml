@@ -43,7 +43,7 @@ runs:
       run: |
         cd ${{ inputs.work-dir }}
         if [ -d "${{ inputs.path }}" ]; then
-          curl -L -o $HOME/bin/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.17/testchart_0.0.17_linux_amd64.tar.gz
+          curl -L -o $HOME/bin/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.19/testchart_0.0.19_linux_amd64.tar.gz
           tar xvzf $HOME/bin/testchart.tar.gz -C $HOME/bin/
 
           command="testchart run \
