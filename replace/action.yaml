@@ -30,7 +30,7 @@ inputs:
 outputs:
 
   changes:
-    description: Number of changed files (as opposed to number of actual string replacements).
+    description: List of changed files paths relative to current working directory.
 
 runs:
   using: 'node16'

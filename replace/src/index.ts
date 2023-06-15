@@ -20,7 +20,7 @@ async function run(): Promise<void> {
     const changes = await findRepl(searchExp, replace, glob);
 
     // Set outputs
-    core.setOutput('changes', changes);
+    core.setOutput('changes', changes.map(x => `"${x}"`).join(" "));
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }

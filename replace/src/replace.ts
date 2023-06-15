@@ -23,9 +23,9 @@ export const findRepl = async (
   find: string | RegExp,
   replace: string,
   inFilesMatching = '**/*'
-): Promise<number> => {
+): Promise<string[]> => {
   const fileMatcherRegex = globToRegex(inFilesMatching, '');
-  let changes = 0;
+  let changes: string[] = [];
 
   for (const file of execSync(
     'git ls-files --cached --others --exclude-standard'
@@ -39,7 +39,7 @@ export const findRepl = async (
         const output = replaceAll(input, find, replace);
         if (output != input) {
           console.log('Changed: ' + file);
-          changes++;
+          changes.push(file);
         }
 
         await writeFile(file, output);
@@ -54,7 +54,7 @@ export const findRepl = async (
     }
   }
 
-  if (changes == 0) {
+  if (changes.length == 0) {
     console.log('No file changed.');
   }
 

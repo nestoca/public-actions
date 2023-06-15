@@ -42,7 +42,7 @@ inputs:
 outputs:
 
   changes:
-    description: Number of changed files.
+    description: List of changed files paths relative to current working directory.
     value: ${{ steps.replace.outputs.changes }}
 
 runs:
@@ -66,7 +66,7 @@ runs:
 
     - name: Replace within working copy
       id: replace
-      uses: silphid/actions/replace@v1
+      uses: silphid/actions/replace@master
       with:
         glob: ${{ inputs.glob }}
         search: ${{ inputs.search }}
@@ -75,9 +75,9 @@ runs:
  
     - name: Commit and push changes
       shell: bash
-      if: ${{ steps.replace.outputs.changes != '0' }}
+      if: ${{ steps.replace.outputs.changes != '' }}
       run: |-
         git pull
-        git add .
+        git add ${{ steps.replace.outputs.changes }}
         git commit -m '${{ inputs.message }}'
         git push

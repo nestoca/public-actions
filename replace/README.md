@@ -16,7 +16,7 @@ number of changed files.
 
 # Outputs
 
-- `changes`: Number of files changed (as opposed to number of actual string replacements).
+- `changes`: List of changed files paths relative to current working directory.
 
 # Example
 
