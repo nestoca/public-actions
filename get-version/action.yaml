@@ -1,0 +1,56 @@
+name: get-version
+description: >-
+  Determines metadata for a given build (version, git tag, docker tag).
+  Uses https://github.com/codacy/git-version/tree/2.7.1 under the hood.
+
+inputs:
+
+  git-tag-prefix:
+    description: >
+      Optional prefix for git tags used to version project. In a typical project, that
+      would be simply "v" (the default), eg: "v0.0.1". In a monorepo, that should include
+      the path to sub-project, eg: "path/to/my-project/v".
+    required: false
+    default: v
+
+outputs:
+
+  version:
+    description: >
+      Version being built in semver format (eg: "0.0.1").
+    value: ${{ steps.outputs.outputs.version }}
+
+  git-tag:
+    description: >
+      Git tag to mark current build in git (eg: "v0.0.1" or "path/to/my-project/v0.0.1").
+    value: ${{ steps.outputs.outputs.git-tag }}
+
+  docker-tag:
+    description: >
+      Tag for docker image being built (eg: "0.0.1").
+    value: ${{ steps.outputs.outputs.docker-tag }}
+      
+runs:
+  using: composite
+  steps:
+
+    - name: Determine version using git-version action
+      id: version
+      uses: codacy/git-version@2.7.1
+      with:
+        prefix: ${{ inputs.git-tag-prefix }}
+
+    - name: Determine outputs
+      id: outputs
+      shell: bash
+      run: |-
+        # Git tag is version as computed by git-version (eg: "v0.0.1" or "path/to/my-project/v0.0.1")
+        git_tag=${{ steps.version.outputs.version }}
+        echo "git-tag=$git_tag" >> $GITHUB_OUTPUT
+
+        # Version is git tag without prefix (eg: "0.0.1")
+        version=${git_tag#${{ inputs.git-tag-prefix }}}
+        echo "version=$version" >> $GITHUB_OUTPUT
+
+        # Docker tag is equivalent to version (eg: "0.0.1")
+        echo "docker-tag=$version" >> $GITHUB_OUTPUT
