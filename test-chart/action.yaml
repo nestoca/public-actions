@@ -2,11 +2,37 @@ name: test-chart
 description: Performs chart tests using https://github.com/silphid/testchart, if any present in `tests` sub-dir of chart.
 
 inputs:
+
   work-dir:
     description: >
-      Location where to perform operation. Defaults to workspace.
+      Optional location where to perform operation. Defaults to workspace.
     required: false
     default: "."
+
+  namespace:
+    description: >
+      Optional name of namespace to use for rendering chart (default "my-namespace").
+    required: false
+    default: my-namespace
+  
+  release:
+    description: >
+      Optional name of release to use for rendering chart (default "my-release").
+    required: false
+    default: my-release
+  
+  path:
+    description: >
+      Optional path to tests directory relative to chart's root directory (default "tests").
+    required: false
+    default: tests
+
+  ignore:
+    description: >
+      Optional regex specifying lines to ignore. Multiple ignore patterns can be passed
+      as a multi-line value, with one pattern per line.
+    required: false
+    default: ""
 
 runs:
   using: 'composite'
@@ -16,10 +42,22 @@ runs:
       shell: bash
       run: |
         cd ${{ inputs.work-dir }}
-        if [ -d "tests" ]; then
-          curl -L -o $HOME/bin/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.18/testchart_0.0.18_linux_amd64.tar.gz
+        if [ -d "${{ inputs.path }}" ]; then
+          curl -L -o $HOME/bin/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.17/testchart_0.0.17_linux_amd64.tar.gz
           tar xvzf $HOME/bin/testchart.tar.gz -C $HOME/bin/
-          testchart run
+
+          command="testchart run \
+            --namespace ${{ inputs.namespace }} \
+            --release ${{ inputs.release }} \
+            --path ${{ inputs.path }} \
+            --show-values ${{ inputs.show-values }}"
+
+          # Add all ignore patterns passed as a multi-line string, if any
+          while IFS= read -r line; do
+            command+=" --ignore '$line'"
+          done <<< "${{ inputs.ignore }}}"
+
+          eval "$command"
         else
-          echo "No tests sub-directory found in chart"
+          echo "No ${{ inputs.path }} sub-directory found in chart"
         fi
