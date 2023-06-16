@@ -45,11 +45,13 @@ runs:
         if [ -d "${{ inputs.path }}" ]; then
 
           # Install testchart
-          curl -L -o $HOME/bin/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.19/testchart_0.0.19_linux_amd64.tar.gz
-          tar xvzf $HOME/bin/testchart.tar.gz -C $HOME/bin/
+          BIN_DIR=$HOME/bin
+          mkdir -p $BIN_DIR
+          curl -L -o $BIN_DIR/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.19/testchart_0.0.19_linux_amd64.tar.gz
+          tar xvzf $BIN_DIR/testchart.tar.gz -C $BIN_DIR
 
           # Build testchart command
-          command="testchart run \
+          command="$BIN_DIR/testchart run \
             --namespace ${{ inputs.namespace }} \
             --release ${{ inputs.release }} \
             --path ${{ inputs.path }} \
