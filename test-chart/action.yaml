@@ -47,7 +47,7 @@ runs:
           # Install testchart
           BIN_DIR=$HOME/bin
           mkdir -p $BIN_DIR
-          curl -sLo $BIN_DIR/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.20/testchart_0.0.20_linux_amd64.tar.gz
+          curl -sLo $BIN_DIR/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.22/testchart_0.0.22_linux_amd64.tar.gz
           tar xvzf $BIN_DIR/testchart.tar.gz -C $BIN_DIR
 
           # Build testchart command
