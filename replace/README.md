@@ -9,6 +9,7 @@ number of changed files.
 
 # Inputs
 
+- `work-dir`: Optional location from where to perform operation. Defaults to workspace.
 - `glob`: Optional glob pattern to determine which files to perform the search and replace against (defaults to all files).
 - `search`: Regex expression to search for (or set `regex` to "false" to search for plain text instead).
 - `replace`: Text to replace with. Use `$1` and so on to reintroduce capture groups.

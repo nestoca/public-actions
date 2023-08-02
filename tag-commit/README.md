@@ -4,12 +4,15 @@ Adds given tag to git commit and pushes tag to remote.
 
 # Inputs
 
+- `work-dir`: Optional directory in which to perform operation. Defaults to workspace.
+
 - `commit`: Optional commit to be tagged, defaulting to value of `GITHUB_SHA`. Can be specified using any of the formats supported by `git tag`, such as:
   - Commit SHA (eg: `c4fe2b8f6a78d9f4d9f8184a20b68f8d6677d053`)
   - Short commit SHA (eg: `c4fe2b8`)
   - Branch reference (eg: `master`)
   - Tag reference (eg: `v0.0.1`)
   - etc.
+
 - `tag`: Value of tag to add to given commit.
 
 # Example

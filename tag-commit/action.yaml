@@ -3,6 +3,12 @@ description: Adds given tag to git commit and pushes tag to remote.
 
 inputs:
 
+  work-dir:
+    description: |
+      Optional directory in which to perform operation. Defaults to workspace.
+    required: false
+    default: .
+
   commit:
     description: |-
       Optional commit to be tagged, defaulting to value of `GITHUB_SHA`. Can be specified
@@ -26,5 +32,6 @@ runs:
     - name: Add and push commit tag
       shell: bash
       run: |-
+        cd ${{ inputs.work-dir }}
         git tag ${{ inputs.tag }} ${{ inputs.commit }}
         git push origin ${{ inputs.tag }}
