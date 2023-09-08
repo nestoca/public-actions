@@ -11,7 +11,7 @@ inputs:
 
   commit:
     description: |-
-      Optional commit to be tagged, defaulting to value of `GITHUB_SHA`. Can be specified
+      Optional commit to be tagged, defaulting to current branch's `HEAD`. Can be specified
       using any of the formats supported by `git tag`, such as:
         - Commit SHA (eg: `c4fe2b8f6a78d9f4d9f8184a20b68f8d6677d053`)
         - Short commit SHA (eg: `c4fe2b8`)
@@ -19,7 +19,7 @@ inputs:
         - Tag reference (eg: `v0.0.1`)
         - etc.
     required: false
-    default: ${{ github.sha }}
+    default: ""
 
   tag:
     description: Value of tag to add to given commit.
