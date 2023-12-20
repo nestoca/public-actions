@@ -38,6 +38,14 @@ runs:
   using: 'composite'
 
   steps:
+    - name: Determine latest version of testchart
+      id: get-version
+      shell: bash
+      run: |
+        VERSION=$(curl -s https://api.github.com/repos/silphid/testchart/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
+        echo "Latest version of testchart is v$VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
     - name: Perform chart tests
       shell: bash
       run: |
@@ -47,7 +55,8 @@ runs:
           # Install testchart
           BIN_DIR=$HOME/bin
           mkdir -p $BIN_DIR
-          curl -sLo $BIN_DIR/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v0.0.26/testchart_0.0.26_linux_amd64.tar.gz
+          VERSION=${{ steps.get-version.outputs.version }}
+          curl -sLo $BIN_DIR/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v$VERSION/testchart_${VERSION}_linux_amd64.tar.gz
           tar xvzf $BIN_DIR/testchart.tar.gz -C $BIN_DIR
 
           # Build testchart command
