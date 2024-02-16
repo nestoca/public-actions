@@ -9,31 +9,16 @@ inputs:
     required: false
     default: "."
 
-  namespace:
+  args:
     description: >
-      Optional name of namespace to use for rendering chart (default "my-namespace").
-    required: false
-    default: my-namespace
-  
-  release:
-    description: >
-      Optional name of release to use for rendering chart (default "my-release").
-    required: false
-    default: my-release
-  
-  path:
-    description: >
-      Optional path to tests directory relative to chart's root directory (default "tests").
-    required: false
-    default: tests
+      Arguments to pass to test-chart command. Ex "--namespace my-namespace --release my-release --path /some/path/ --show-values"
+    required: true
 
-  ignore:
+  version:
     description: >
-      Optional regex specifying lines to ignore. Multiple ignore patterns can be passed
-      as a multi-line value, with one pattern per line.
+      Version of testchart to use. Uses latest version if not specified. Ex: 0.0.27
     required: false
-    default: ""
-
+    
 runs:
   using: 'composite'
 
@@ -42,38 +27,33 @@ runs:
       id: get-version
       shell: bash
       run: |
-        VERSION=$(curl -s https://api.github.com/repos/silphid/testchart/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
-        echo "Latest version of testchart is v$VERSION"
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        if [ -z "${{ inputs.version }}" ]; then
+          VERSION=$(curl -s https://api.github.com/repos/silphid/testchart/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
+          echo "Latest version of testchart is v$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        else
+          echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+        fi
 
     - name: Perform chart tests
       shell: bash
       run: |
         cd ${{ inputs.work-dir }}
-        if [ -d "${{ inputs.path }}" ]; then
+        
+        # Install testchart
+        BIN_DIR=$HOME/bin
+        mkdir -p $BIN_DIR
+        VERSION=${{ steps.get-version.outputs.version }}
+        curl -sLo $BIN_DIR/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v$VERSION/testchart_${VERSION}_linux_amd64.tar.gz
+        tar xvzf $BIN_DIR/testchart.tar.gz -C $BIN_DIR
 
-          # Install testchart
-          BIN_DIR=$HOME/bin
-          mkdir -p $BIN_DIR
-          VERSION=${{ steps.get-version.outputs.version }}
-          curl -sLo $BIN_DIR/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v$VERSION/testchart_${VERSION}_linux_amd64.tar.gz
-          tar xvzf $BIN_DIR/testchart.tar.gz -C $BIN_DIR
+        # Build testchart command
+        command="$BIN_DIR/testchart run ${{ inputs.args }}"
 
-          # Build testchart command
-          command="$BIN_DIR/testchart run \
-            --namespace ${{ inputs.namespace }} \
-            --release ${{ inputs.release }} \
-            --path ${{ inputs.path }} \
-            --show-values ${{ inputs.show-values }}"
+        # Add ignore patterns passed as a multi-line string, if any
+        while IFS= read -r line; do
+          command+=" --ignore '$line'"
+        done <<< "${{ inputs.ignore }}}"
 
-          # Add ignore patterns passed as a multi-line string, if any
-          while IFS= read -r line; do
-            command+=" --ignore '$line'"
-          done <<< "${{ inputs.ignore }}}"
-
-          # Run testchart
-          eval "$command"
-
-        else
-          echo "No ${{ inputs.path }} sub-directory found in chart"
-        fi
+        # Run testchart
+        eval "$command"
