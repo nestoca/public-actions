@@ -24,7 +24,7 @@ inputs:
   tag:
     description: Value of tag to add to given commit.
     required: true
-      
+
 runs:
   using: 'composite'
   steps:
@@ -33,5 +33,5 @@ runs:
       shell: bash
       run: |-
         cd ${{ inputs.work-dir }}
-        git tag ${{ inputs.tag }} ${{ inputs.commit }}
+        git tag ${{ inputs.tag }} ${{ inputs.commit }} --message 'Tagged in: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
         git push origin ${{ inputs.tag }}
