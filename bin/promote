@@ -1,0 +1,51 @@
+#!/usr/bin/env -S pkgx +gum bash
+# Install pkgx with 'brew install pkgxdev/made/pkgx'
+# https://docs.pkgx.sh/run-anywhere/terminals
+
+set -o errexit
+set -o pipefail
+set -u
+shopt -s inherit_errexit 2> /dev/null || true
+
+IFS=$'\n\t'
+
+_info() {
+  echo >&2 "[info] $*"
+}
+
+_tag_and_push() {
+  local tag="$1"
+  git tag "${tag}" "${@:2}" --force
+  git push origin "refs/tags/${tag}" --force
+}
+
+_main() {
+  local tagged_ref="${1:-origin/master}"
+
+  _info 'Fetching origin'
+  git fetch --tags --force origin
+
+  if git merge-base --is-ancestor "${tagged_ref}" v1; then
+    _info "Rolling back the following commits (if any):"
+  else
+    _info "Promoting the following commits:"
+  fi
+
+  PAGER=cat git log "v1...${tagged_ref}"
+
+  if gum confirm "Show diff?"; then
+    PAGER=cat git diff "v1..${tagged_ref}"
+  fi
+
+  gum confirm "Are you sure you want to tag ${tagged_ref} as 'v1' and promote (or rollback) the commits above?"
+
+  local message
+  message="Previous v1: $(git rev-list -n 1 v1)"
+
+  _tag_and_push "v1-$(date -u +"%Y-%m-%dT%H-%M-%S%z")" "${tagged_ref}" --message "${message}" "${@:2}"
+  _tag_and_push v1 "${tagged_ref}" --message "${message}" "${@:2}"
+
+  _info "Done! Now go trigger some builds to see if they still work. 😬"
+}
+
+_main "$@"
