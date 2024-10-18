@@ -18,7 +18,7 @@ inputs:
     description: >
       Version of testchart to use. Uses latest version if not specified. Ex: 0.0.27
     required: false
-    
+
 runs:
   using: 'composite'
 
@@ -39,7 +39,7 @@ runs:
       shell: bash
       run: |
         cd ${{ inputs.work-dir }}
-        
+
         # Install testchart
         BIN_DIR=$HOME/bin
         mkdir -p $BIN_DIR

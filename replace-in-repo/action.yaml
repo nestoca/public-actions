@@ -29,7 +29,7 @@ inputs:
   replace:
     description: Text to replace with.
     required: true
- 
+
   regex:
     description: Whether to enable regex ("true") or not ("false"). Defaults to "true".
     required: false
@@ -51,14 +51,14 @@ runs:
 
     - name: Replace within working copy
       id: replace
-      uses: silphid/actions/replace@v1
+      uses: nestoca/public-actions/replace@v1
       with:
         work-dir: ${{ inputs.work-dir }}
         glob: ${{ inputs.glob }}
         search: ${{ inputs.search }}
         replace: ${{ inputs.replace }}
         regex: ${{ inputs.regex }}
- 
+
     - name: Commit and push changes
       shell: bash
       if: ${{ steps.replace.outputs.changes != '' }}
