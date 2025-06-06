@@ -68,5 +68,3 @@ runs:
         git config user.email github-actions@github.com
         git add ${{ steps.replace.outputs.changes }}
         git commit -m '${{ inputs.message }}'
-        git pull || true
-        git push
