@@ -28,7 +28,7 @@ runs:
       shell: bash
       run: |
         if [ -z "${{ inputs.version }}" ]; then
-          VERSION=$(curl -s https://api.github.com/repos/silphid/testchart/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
+          VERSION=$(curl --header "Authorization: Bearer ${{ github.token }}" --silent --fail --show-error https://api.github.com/repos/silphid/testchart/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
           echo "Latest version of testchart is v$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
         else
@@ -44,8 +44,14 @@ runs:
         BIN_DIR=$HOME/bin
         mkdir -p $BIN_DIR
         VERSION=${{ steps.get-version.outputs.version }}
-        curl -sLo $BIN_DIR/testchart.tar.gz https://github.com/silphid/testchart/releases/download/v$VERSION/testchart_${VERSION}_linux_amd64.tar.gz
-        tar xvzf $BIN_DIR/testchart.tar.gz -C $BIN_DIR
+        curl \
+          --header "Authorization: Bearer ${{ github.token }}" \
+          --location \
+          --fail \
+          --show-error \
+          --output bin.tar.gz \
+          https://github.com/silphid/testchart/releases/download/v$VERSION/testchart_${VERSION}_linux_amd64.tar.gz
+          tar xvzf bin.tar.gz -C $BIN_DIR
 
         # Build testchart command
         command="$BIN_DIR/testchart run ${{ inputs.args }}"
