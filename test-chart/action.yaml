@@ -2,12 +2,11 @@ name: test-chart
 description: Performs chart tests using https://github.com/silphid/testchart, if any present in `tests` sub-dir of chart.
 
 inputs:
-
   work-dir:
     description: >
       Optional location where to perform operation. Defaults to workspace.
     required: false
-    default: "."
+    default: '.'
 
   args:
     description: >
@@ -44,6 +43,7 @@ runs:
         BIN_DIR=$HOME/bin
         mkdir -p $BIN_DIR
         VERSION=${{ steps.get-version.outputs.version }}
+
         curl \
           --header "Authorization: Bearer ${{ github.token }}" \
           --location \
@@ -51,7 +51,9 @@ runs:
           --show-error \
           --output bin.tar.gz \
           https://github.com/silphid/testchart/releases/download/v$VERSION/testchart_${VERSION}_linux_amd64.tar.gz
-          tar xvzf bin.tar.gz -C $BIN_DIR
+
+        tar xvzf bin.tar.gz -C $BIN_DIR
+        rm bin.tar.gz
 
         # Build testchart command
         command="$BIN_DIR/testchart run ${{ inputs.args }}"
