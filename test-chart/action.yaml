@@ -68,7 +68,7 @@ runs:
         if [ -n "${{ inputs.ignore-patterns }}" ]; then
           while IFS= read -r line; do
             command+=" --ignore '$line'"
-          done <<< "${{ inputs.ignore-patterns }}}"
+          done <<< "${{ inputs.ignore-patterns }}"
         fi
 
         # Run testchart
