@@ -6,7 +6,7 @@ inputs:
     description: >
       Optional location where to perform operation. Defaults to workspace.
     required: false
-    default: '.'
+    default: "."
 
   args:
     description: >
@@ -18,8 +18,14 @@ inputs:
       Version of testchart to use. Uses latest version if not specified. Ex: 0.0.27
     required: false
 
+  ignore-patterns:
+    description: >
+      Optional regex patterns of lines to ignore. Multiple ignore patterns can be passed as a multi-line value, with one pattern per line.
+    required: false
+    default: ""
+
 runs:
-  using: 'composite'
+  using: "composite"
 
   steps:
     - name: Determine latest version of testchart
@@ -59,9 +65,11 @@ runs:
         command="$BIN_DIR/testchart run ${{ inputs.args }}"
 
         # Add ignore patterns passed as a multi-line string, if any
-        while IFS= read -r line; do
-          command+=" --ignore '$line'"
-        done <<< "${{ inputs.ignore }}}"
+        if [ -n "${{ inputs.ignore-patterns }}" ]; then
+          while IFS= read -r line; do
+            command+=" --ignore '$line'"
+          done <<< "${{ inputs.ignore-patterns }}"
+        fi
 
         # Run testchart
         eval "$command"
