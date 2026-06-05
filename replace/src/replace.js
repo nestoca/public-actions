@@ -4,13 +4,13 @@
 //
 import { readFile, writeFile } from 'node:fs/promises';
 import { execSync } from 'node:child_process';
-import { globToRegex } from './glob';
+import { globToRegex } from './glob.js';
 
-const escapeStringForRegex = (str: string): string => {
+const escapeStringForRegex = (str) => {
   return str.replace(/[$()*+.?[\\\]^{|}]/g, '\\$&');
 };
 
-const replaceAll = (str: string, from: string | RegExp, to: string) => {
+const replaceAll = (str, from, to) => {
   return from instanceof RegExp
     ? str.replace(
         from.global ? from : new RegExp(from.source, from.flags + 'g'),
@@ -19,17 +19,11 @@ const replaceAll = (str: string, from: string | RegExp, to: string) => {
     : str.replace(new RegExp(escapeStringForRegex(from), 'g'), to);
 };
 
-export const findRepl = async (
-  find: string | RegExp,
-  replace: string,
-  inFilesMatching = '**/*'
-): Promise<string[]> => {
+export const findRepl = async (find, replace, inFilesMatching = '**/*') => {
   const fileMatcherRegex = globToRegex(inFilesMatching, '');
-  let changes: string[] = [];
+  let changes = [];
 
-  for (const file of execSync(
-    'git ls-files --cached --others --exclude-standard'
-  )
+  for (const file of execSync('git ls-files --cached --others --exclude-standard')
     .toString()
     .split('\n')
     .filter(Boolean)) {
@@ -41,7 +35,6 @@ export const findRepl = async (
           console.log('Changed: ' + file);
           changes.push(file);
         }
-
         await writeFile(file, output);
       }
     } catch (error) {

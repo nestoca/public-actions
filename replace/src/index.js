@@ -1,7 +1,7 @@
-import { getInput, setFailed, setOutput } from './actions';
-import { findRepl } from './replace';
+import { getInput, setFailed, setOutput } from './actions.js';
+import { findRepl } from './replace.js';
 
-async function run(): Promise<void> {
+async function run() {
   try {
     const workDir = getInput('work-dir');
     const glob = getInput('glob');
@@ -19,7 +19,7 @@ async function run(): Promise<void> {
     const searchExp = regex == 'true' ? new RegExp(search, 'gm') : search;
     const changes = await findRepl(searchExp, replace, glob);
 
-    setOutput('changes', changes.map(x => `"${x}"`).join(" "));
+    setOutput('changes', changes.map(x => `"${x}"`).join(' '));
   } catch (error) {
     if (error instanceof Error) setFailed(error.message);
   }
